@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fechador Digital de Fe Cierta</title>
+  <title>Fechador Digital - Sello Postal Vintage & Neón</title>
   <style>
     :root {
       --bg-color: #0f172a;
       --card-bg: #1e293b;
       --accent-color: #0284c7;
+      --neon-cyan: #38bdf8;
       --text-color: #f8fafc;
     }
 
@@ -25,7 +26,7 @@
 
     .container {
       width: 100%;
-      max-width: 600px;
+      max-width: 650px;
       background: var(--card-bg);
       padding: 20px;
       border-radius: 12px;
@@ -38,7 +39,7 @@
       margin-top: 0;
       margin-bottom: 16px;
       font-size: 1.3rem;
-      color: #38bdf8;
+      color: var(--neon-cyan);
     }
 
     /* Línea de tiempo en vivo */
@@ -53,9 +54,10 @@
     }
 
     .clock-live {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: bold;
-      color: #22c55e;
+      color: #38bdf8;
+      text-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
       word-break: break-all;
     }
 
@@ -79,12 +81,10 @@
       display: none;
     }
 
-    /* Ocultar canvas de procesamiento */
     #hiddenCanvas {
       display: none;
     }
 
-    /* Resultado */
     .result-section {
       display: none;
       text-align: center;
@@ -96,14 +96,14 @@
       height: auto;
       border-radius: 8px;
       border: 2px solid #334155;
-      background: #ffffff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      background: #000;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
 
     .download-link {
       display: block;
       width: 100%;
-      background: #16a34a;
+      background: #0284c7;
       color: white;
       text-decoration: none;
       padding: 14px 0;
@@ -112,11 +112,11 @@
       font-size: 1rem;
       margin-top: 16px;
       text-align: center;
-      box-shadow: 0 4px 10px rgba(22, 163, 74, 0.4);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
     }
 
     .download-link:active {
-      background: #15803d;
+      background: #0369a1;
     }
 
     .hint-text {
@@ -129,39 +129,66 @@
 <body>
 
 <div class="container">
-  <h1>Fechador Digital de Fe Cierta</h1>
+  <h1>Fechador Digital - Estilo Postal & Neón</h1>
 
-  <!-- Reloj / Línea de tiempo continua -->
+  <!-- Reloj / Línea de tiempo continua (Hora Argentina) -->
   <div class="timeline-bar">
-    <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px;">LÍNEA DE TIEMPO EN VIVO (UTC)</div>
-    <div class="clock-live" id="liveClock">0000-00-00 00:00:00.000</div>
+    <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px;">HORA OFICIAL PROVINCIA DE BS. AS. (ART / UTC-3)</div>
+    <div class="clock-live" id="liveClock">00/00/0000 00:00:00.000 ART</div>
   </div>
 
-  <!-- Zona de selección -->
+  <!-- Carga de archivo -->
   <div class="upload-zone" onclick="document.getElementById('imgInput').click()">
-    <p>📁 TOCAR AQUÍ PARA SUBIR IMAGEN</p>
+    <p>📷 TOCAR AQUÍ PARA SUBIR O TOMAR FOTO</p>
     <input type="file" id="imgInput" accept="image/*" onchange="handleFileSelect(this.files[0])">
   </div>
 
-  <!-- Canvas oculto para procesar -->
   <canvas id="hiddenCanvas"></canvas>
 
   <!-- Resultado renderizado -->
   <div class="result-section" id="resultSection">
-    <p style="text-align: left; margin-bottom: 8px; font-weight: bold; color: #cbd5e1;">Comprobante Generado:</p>
-    <img id="finalImage" class="result-img" alt="Comprobante Fechado">
+    <p style="text-align: left; margin-bottom: 8px; font-weight: bold; color: #cbd5e1;">Comprobante Estampado (Vintage & Neón):</p>
+    <img id="finalImage" class="result-img" alt="Imagen estampada">
     
-    <a id="downloadBtn" class="download-link" href="#" download="fechado_digital.png">📥 GUARDAR / DESCARGAR IMAGEN</a>
-    <p class="hint-text">(En celulares también puedes mantener presionada la imagen para guardarla)</p>
+    <a id="downloadBtn" class="download-link" href="#" download="fechado_vintage_neon.png">📥 DESCARGAR IMAGEN ESTAMPADA</a>
+    <p class="hint-text">(O mantén presionada la imagen para guardarla en la galería del celular)</p>
   </div>
 </div>
 
 <script>
-  // Reloj continuo con milisegundos
+  // Obtener fecha y hora oficial de Argentina con milisegundos
+  function getArgentinaFormattedTime(dateObj = new Date()) {
+    const ms = String(dateObj.getMilliseconds()).padStart(3, '0');
+    
+    const options = {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    };
+
+    const formatter = new Intl.DateTimeFormat('es-AR', options);
+    const parts = Object.fromEntries(formatter.formatToParts(dateObj).map(p => [p.type, p.value]));
+
+    const dateStr = `${parts.day}/${parts.month}/${parts.year}`;
+    const timeStr = `${parts.hour}:${parts.minute}:${parts.second}.${ms}`;
+
+    return {
+      full: `${dateStr} ${timeStr} ART (UTC-3)`,
+      dateOnly: dateStr,
+      timeOnlyMs: timeStr,
+      stampTime: `${parts.hour}:${parts.minute}:${parts.second}.${ms}`
+    };
+  }
+
+  // Reloj continuo
   function updateLiveClock() {
-    const now = new Date();
-    const isoString = now.toISOString().replace('T', ' ').replace('Z', '');
-    document.getElementById('liveClock').textContent = isoString;
+    const timeData = getArgentinaFormattedTime();
+    document.getElementById('liveClock').textContent = timeData.full;
     requestAnimationFrame(updateLiveClock);
   }
   requestAnimationFrame(updateLiveClock);
@@ -169,31 +196,29 @@
   function handleFileSelect(file) {
     if (!file) return;
 
-    const timestamp = new Date();
-    const formattedTime = timestamp.toISOString().replace('T', ' ').replace('Z', '');
+    const timeData = getArgentinaFormattedTime(new Date());
     
     const sizeInKB = (file.size / 1024).toFixed(2);
     const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
     const sizeStr = file.size > 1048576 ? `${sizeInMB} MB (${file.size} bytes)` : `${sizeInKB} KB (${file.size} bytes)`;
 
-    // Obtener Geolocalización
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const geoStr = `Lat: ${pos.coords.latitude.toFixed(6)}, Lon: ${pos.coords.longitude.toFixed(6)} (±${pos.coords.accuracy.toFixed(1)}m)`;
-          generateStampCard(file, formattedTime, sizeStr, geoStr);
+          generateVintageNeonStamp(file, timeData, sizeStr, geoStr);
         },
         () => {
-          generateStampCard(file, formattedTime, sizeStr, "Geolocalización no permitida");
+          generateVintageNeonStamp(file, timeData, sizeStr, "GEO: No permitida");
         },
         { enableHighAccuracy: true, timeout: 5000 }
       );
     } else {
-      generateStampCard(file, formattedTime, sizeStr, "Geolocalización no soportada");
+      generateVintageNeonStamp(file, timeData, sizeStr, "GEO: No soportada");
     }
   }
 
-  function generateStampCard(file, timeStr, sizeStr, geoStr) {
+  function generateVintageNeonStamp(file, timeData, sizeStr, geoStr) {
     const reader = new FileReader();
     reader.onload = function(e) {
       const img = new Image();
@@ -201,94 +226,102 @@
         const canvas = document.getElementById('hiddenCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Dimensiones base del comprobante
-        const canvasWidth = 800;
-        const padding = 30;
-        
-        // Calcular alto manteniendo proporción de imagen cargada
-        const maxImgHeight = 400;
-        let imgWidth = canvasWidth - (padding * 2);
-        let imgHeight = (img.height / img.width) * imgWidth;
-        
-        if (imgHeight > maxImgHeight) {
-          imgHeight = maxImgHeight;
-          imgWidth = (img.width / img.height) * imgHeight;
-        }
+        const imgWidth = img.width;
+        const imgHeight = img.height;
 
-        const infoHeight = 220;
-        const canvasHeight = padding + imgHeight + infoHeight + padding;
+        const bannerHeight = Math.max(140, Math.round(imgHeight * 0.18));
+        const canvasWidth = imgWidth;
+        const canvasHeight = imgHeight + bannerHeight;
 
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
 
-        // Fondo blanco
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        // 1. DIBUJAR LA FOTO ORIGINAL
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
 
-        // Dibujar imagen centrada
-        const imgX = (canvasWidth - imgWidth) / 2;
-        ctx.drawImage(img, imgX, padding, imgWidth, imgHeight);
+        // 2. DIBUJAR BANDA INFERIOR DE METADATOS EN TONO AZUL OSCURO NOCTURNO
+        ctx.fillStyle = '#0a1128';
+        ctx.fillRect(0, imgHeight, canvasWidth, bannerHeight);
 
-        // Marco a la imagen
-        ctx.strokeStyle = '#cbd5e1';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(imgX, padding, imgWidth, imgHeight);
-
-        // Línea divisora
-        const infoStartY = padding + imgHeight + 25;
+        // Línea divisora celeste neón resplandeciente
+        ctx.shadowColor = '#00d8ff';
+        ctx.shadowBlur = 10;
+        ctx.strokeStyle = '#00d8ff';
+        ctx.lineWidth = Math.max(3, Math.round(imgWidth * 0.005));
         ctx.beginPath();
-        ctx.moveTo(padding, infoStartY);
-        ctx.lineTo(canvasWidth - padding, infoStartY);
-        ctx.strokeStyle = '#e2e8f0';
-        ctx.lineWidth = 3;
+        ctx.moveTo(0, imgHeight);
+        ctx.lineTo(canvasWidth, imgHeight);
         ctx.stroke();
+        ctx.shadowBlur = 0; // Reset sombra
 
-        // Escribir Metadatos
-        ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 22px sans-serif';
-        ctx.fillText('ACTA DE ESTAMPA TEMPORAL', padding, infoStartY + 35);
+        const fontSizeTitle = Math.max(16, Math.round(imgWidth * 0.028));
+        const fontSizeData = Math.max(13, Math.round(imgWidth * 0.022));
+        const marginX = Math.round(imgWidth * 0.03);
 
-        ctx.font = '16px monospace';
-        ctx.fillStyle = '#334155';
-        ctx.fillText(`FECHA/HORA (UTC): ${timeStr}`, padding, infoStartY + 70);
-        ctx.fillText(`PESO Y TAMAÑO  : ${sizeStr}`, padding, infoStartY + 95);
-        ctx.fillText(`ARCHIVO ORIGINAL : ${file.name.substring(0, 35)}`, padding, infoStartY + 120);
-        ctx.fillText(`UBICACIÓN (GEO)  : ${geoStr}`, padding, infoStartY + 145);
+        ctx.fillStyle = '#00d8ff';
+        ctx.font = `bold ${fontSizeTitle}px monospace`;
+        ctx.fillText('FECHADO DIGITAL - CORREO & FE CIERTA', marginX, imgHeight + (bannerHeight * 0.25));
 
-        // DIBUJAR SELLO CUADRADO EN CANVAS
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = `${fontSizeData}px monospace`;
+        ctx.fillText(`FECHA Y HORA (ARG): ${timeData.full}`, marginX, imgHeight + (bannerHeight * 0.48));
+        ctx.fillText(`PESO Y TAMAÑO    : ${sizeStr}`, marginX, imgHeight + (bannerHeight * 0.68));
+        ctx.fillText(`UBICACIÓN (GEO)  : ${geoStr}`, marginX, imgHeight + (bannerHeight * 0.88));
+
+        // 3. SELLO RECTANGULAR ESTILO CORREO VINTAGE EN AZULES + CELESTE NEÓN
+        const stampW = Math.max(200, Math.round(imgWidth * 0.35));
+        const stampH = Math.max(110, Math.round(stampW * 0.55));
+        const stampX = imgWidth - stampW - Math.round(imgWidth * 0.04);
+        const stampY = Math.round(imgHeight * 0.04);
+
         ctx.save();
-        ctx.translate(canvasWidth - 140, infoStartY + 80);
-        ctx.rotate(-12 * Math.PI / 180);
+        ctx.translate(stampX + (stampW / 2), stampY + (stampH / 2));
+        ctx.rotate(-6 * Math.PI / 180); // Leve inclinación de sello postal
 
-        // Recuadro del Sello
-        ctx.strokeStyle = '#dc2626';
-        ctx.lineWidth = 4;
-        ctx.fillStyle = 'rgba(255,255,255,0.9)';
-        ctx.fillRect(-65, -65, 130, 130);
-        ctx.strokeRect(-65, -65, 130, 130);
+        // Fondo azul marino semitransparente estilo tinta
+        ctx.fillStyle = 'rgba(10, 25, 47, 0.92)';
+        ctx.fillRect(-stampW/2, -stampH/2, stampW, stampH);
+
+        // Marco doble de correo vintage (Azul clásico)
+        ctx.strokeStyle = '#1d4ed8';
+        ctx.lineWidth = Math.max(3, Math.round(stampH * 0.04));
+        ctx.strokeRect(-stampW/2, -stampH/2, stampW, stampH);
+
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect((-stampW/2) + 4, (-stampH/2) + 4, stampW - 8, stampH - 8);
 
         // Textos del Sello
-        ctx.fillStyle = '#dc2626';
+        const fontHeader = Math.max(10, Math.round(stampH * 0.12));
+        const fontNeonTime = Math.max(12, Math.round(stampH * 0.17));
+        const fontSub = Math.max(8, Math.round(stampH * 0.09));
+
+        // Título del sello (Azul postal vintage)
+        ctx.fillStyle = '#60a5fa';
         ctx.textAlign = 'center';
-        ctx.font = 'bold 12px sans-serif';
-        ctx.fillText('FECHADO DIGITAL', 0, -35);
+        ctx.font = `bold ${fontHeader}px sans-serif`;
+        ctx.fillText('ESTAMPADO DE FECHA', 0, -stampH * 0.28);
 
-        ctx.beginPath();
-        ctx.moveTo(-50, -25);
-        ctx.lineTo(50, -25);
-        ctx.strokeStyle = '#dc2626';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        // Fecha en azul claro
+        ctx.font = `${fontSub}px monospace`;
+        ctx.fillText(`FECHA: ${timeData.dateOnly}`, 0, -stampH * 0.10);
 
-        ctx.font = 'bold 11px sans-serif';
-        ctx.fillText('VERIFICADO', 0, -5);
+        // HORA HASTA MILISEGUNDOS EN CELESTE NEÓN BRILLANTE (Efecto Resplandor)
+        ctx.shadowColor = '#00f0ff';
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = '#00f0ff';
+        ctx.font = `bold ${fontNeonTime}px monospace`;
+        ctx.fillText(timeData.stampTime, 0, stampH * 0.18);
+        ctx.shadowBlur = 0; // Reset glow
 
-        const timeOnly = timeStr.split(' ')[1] || timeStr;
-        ctx.font = '10px monospace';
-        ctx.fillText(timeOnly, 0, 25);
+        // Pie del sello postal vintage
+        ctx.fillStyle = '#93c5fd';
+        ctx.font = `bold ${fontSub}px sans-serif`;
+        ctx.fillText('PROVINCIA DE BS. AS. • ART', 0, stampH * 0.38);
+
         ctx.restore();
 
-        // Convertir Canvas a Data URL e inyectar en tag <img> y <a> de descarga
+        // 4. GENERAR IMAGEN FINAL
         const dataUrl = canvas.toDataURL('image/png');
         
         const finalImg = document.getElementById('finalImage');
@@ -296,7 +329,7 @@
 
         const downloadBtn = document.getElementById('downloadBtn');
         downloadBtn.href = dataUrl;
-        downloadBtn.download = `Fechado_Digital_${Date.now()}.png`;
+        downloadBtn.download = `Fechado_Vintage_Neon_${Date.now()}.png`;
 
         document.getElementById('resultSection').style.display = 'block';
       };
