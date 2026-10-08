@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fechador Digital de Fe Cierta</title>
+  <!-- Librería para convertir HTML a Imagen descargable en PC y Celulares -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
   <style>
     :root {
       --bg-color: #0f172a;
@@ -31,6 +34,7 @@
       padding: 24px;
       border-radius: 12px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      box-sizing: border-box;
     }
 
     h1 {
@@ -40,7 +44,7 @@
       color: #38bdf8;
     }
 
-    /* Línea de tiempo en tiempo real */
+    /* Línea de tiempo en vivo */
     .timeline-bar {
       background: #090d16;
       border: 1px solid #334155;
@@ -52,10 +56,11 @@
     }
 
     .clock-live {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: bold;
       color: #22c55e;
       letter-spacing: 1px;
+      word-break: break-all;
     }
 
     .upload-zone {
@@ -76,7 +81,7 @@
       display: none;
     }
 
-    /* Área del documento/acta estampada */
+    /* Área del certificado */
     .certificate-card {
       position: relative;
       background: #ffffff;
@@ -86,35 +91,38 @@
       margin-top: 20px;
       display: none;
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      box-sizing: border-box;
     }
 
     .preview-img {
       max-width: 100%;
-      max-height: 400px;
+      max-height: 350px;
       display: block;
       margin: 0 auto 20px auto;
       border-radius: 4px;
       border: 1px solid #cbd5e1;
+      object-fit: contain;
     }
 
     .data-list {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       line-height: 1.6;
       border-top: 2px solid #e2e8f0;
       padding-top: 15px;
+      word-wrap: break-word;
     }
 
     .data-list strong {
       color: #0f172a;
     }
 
-    /* Sello Cuadrado "Fechado Digital" */
+    /* Sello Cuadrado */
     .stamp-square {
       position: absolute;
       top: 20px;
       right: 20px;
-      width: 130px;
-      height: 130px;
+      width: 120px;
+      height: 120px;
       border: 4px solid var(--stamp-color);
       color: var(--stamp-color);
       display: flex;
@@ -125,16 +133,15 @@
       font-weight: bold;
       text-transform: uppercase;
       transform: rotate(-12deg);
-      opacity: 0.85;
-      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
-      user-select: none;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 6px;
+      opacity: 0.9;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 4px;
       box-sizing: border-box;
+      z-index: 10;
     }
 
     .stamp-title {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       border-bottom: 2px solid var(--stamp-color);
       padding-bottom: 2px;
       margin-bottom: 4px;
@@ -143,7 +150,7 @@
 
     .stamp-status {
       font-size: 0.65rem;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .stamp-time {
@@ -152,19 +159,37 @@
       word-break: break-all;
     }
 
+    .actions-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
     .btn {
       background: var(--accent-color);
       color: white;
       border: none;
-      padding: 10px 20px;
+      padding: 12px 20px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
-      margin-top: 10px;
+      font-size: 0.95rem;
+      flex: 1;
+      text-align: center;
+      touch-action: manipulation;
     }
 
     .btn:hover {
       background: #0369a1;
+    }
+
+    .btn-secondary {
+      background: #475569;
+    }
+
+    .btn-secondary:hover {
+      background: #334155;
     }
   </style>
 </head>
@@ -173,19 +198,19 @@
 <div class="container">
   <h1>Fechador Digital de Fe Cierta</h1>
 
-  <!-- Línea de tiempo / Reloj continuo -->
+  <!-- Reloj / Línea de tiempo continua -->
   <div class="timeline-bar">
-    <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px;">LÍNEA DE TIEMPO EN VIVO (UTC)</div>
+    <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 5px;">LÍNEA DE TIEMPO EN VIVO (UTC)</div>
     <div class="clock-live" id="liveClock">0000-00-00 00:00:00.000</div>
   </div>
 
-  <!-- Zona de carga -->
+  <!-- Carga de archivo -->
   <div class="upload-zone" onclick="document.getElementById('imgInput').click()">
-    <p>📁 Haz clic o arrastra una imagen aquí para fechar</p>
+    <p>📁 Toca o haz clic aquí para seleccionar imagen</p>
     <input type="file" id="imgInput" accept="image/*" onchange="processImage(this.files[0])">
   </div>
 
-  <!-- Acta / Comprobante con el Sello -->
+  <!-- Tarjeta de comprobante -->
   <div class="certificate-card" id="certificate">
     <!-- Sello Cuadrado Fechado Digital -->
     <div class="stamp-square">
@@ -194,22 +219,26 @@
       <div class="stamp-time" id="stampTimeCode">00:00:00.000</div>
     </div>
 
-    <h3>Acta de Estampa Temporal</h3>
+    <h3 style="margin-top: 0; padding-right: 130px;">Acta de Estampa Temporal</h3>
     <img id="imgPreview" class="preview-img" alt="Vista previa de imagen">
 
     <div class="data-list">
-      <p><strong>Fecha y Hora de Registro (ms):</strong> <span id="recTime">--</span></p>
+      <p><strong>Fecha y Hora Exacta (ms):</strong> <br><span id="recTime">--</span></p>
       <p><strong>Peso / Tamaño:</strong> <span id="recSize">--</span></p>
       <p><strong>Nombre del Archivo:</strong> <span id="recName">--</span></p>
-      <p><strong>Geolocalización:</strong> <span id="recGeo">Obteniendo coordenadas...</span></p>
+      <p><strong>Geolocalización:</strong> <br><span id="recGeo">Obteniendo coordenadas...</span></p>
     </div>
+  </div>
 
-    <button class="btn" onclick="window.print()">Imprimir / Guardar PDF</button>
+  <!-- Botones de Acción fuera del certificado cargado -->
+  <div class="actions-bar" id="actionsBar" style="display: none;">
+    <button class="btn" id="downloadBtn" onclick="downloadCertificate()">📥 Descargar Comprobante (PNG)</button>
+    <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimir</button>
   </div>
 </div>
 
 <script>
-  // Actualización continua de la línea de tiempo con milisegundos
+  // Reloj continuo con milisegundos
   function updateLiveClock() {
     const now = new Date();
     const isoString = now.toISOString().replace('T', ' ').replace('Z', '');
@@ -218,20 +247,17 @@
   }
   requestAnimationFrame(updateLiveClock);
 
-  // Procesamiento de la imagen cargada
+  // Procesa la imagen subida
   function processImage(file) {
     if (!file) return;
 
-    // 1. Estampa de tiempo exacta al seleccionar el archivo
     const timestamp = new Date();
     const formattedTime = timestamp.toISOString().replace('T', ' ').replace('Z', '');
 
-    // 2. Peso y datos del archivo
     const sizeInKB = (file.size / 1024).toFixed(2);
     const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
     const sizeStr = file.size > 1048576 ? `${sizeInMB} MB (${file.size} bytes)` : `${sizeInKB} KB (${file.size} bytes)`;
 
-    // Mostrar vista previa
     const reader = new FileReader();
     reader.onload = function(e) {
       document.getElementById('imgPreview').src = e.target.result;
@@ -239,31 +265,76 @@
       document.getElementById('recSize').textContent = sizeStr;
       document.getElementById('recName').textContent = file.name;
       
-      // Actualizar texto dentro del sello cuadrado
       const timeOnly = formattedTime.split(' ')[1] || formattedTime;
       document.getElementById('stampTimeCode').textContent = timeOnly;
 
       document.getElementById('certificate').style.display = 'block';
+      document.getElementById('actionsBar').style.display = 'flex';
     };
     reader.readAsDataURL(file);
 
-    // 3. Geolocalización
+    // Geolocalización
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const lat = position.coords.latitude.toFixed(6);
           const lon = position.coords.longitude.toFixed(6);
           const acc = position.coords.accuracy.toFixed(1);
-          document.getElementById('recGeo').textContent = `Lat: ${lat}, Lon: ${lon} (Precisión: ±${acc}m)`;
+          document.getElementById('recGeo').textContent = `Lat: ${lat}, Lon: ${lon} (±${acc}m)`;
         },
         (error) => {
-          document.getElementById('recGeo').textContent = `Permiso denegado o no disponible (${error.message})`;
+          document.getElementById('recGeo').textContent = `Ubicación no disponible (${error.message})`;
         },
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true, timeout: 10000 }
       );
     } else {
-      document.getElementById('recGeo').textContent = "Geolocalización no soportada por el navegador.";
+      document.getElementById('recGeo').textContent = "Geolocalización no soportada.";
     }
+  }
+
+  // Función universal de descarga (Móviles + PC)
+  function downloadCertificate() {
+    const certElement = document.getElementById('certificate');
+    const downloadBtn = document.getElementById('downloadBtn');
+    
+    downloadBtn.textContent = "Generando archivo...";
+    downloadBtn.disabled = true;
+
+    html2canvas(certElement, {
+      scale: 2, // Mayor calidad/resolución
+      useCORS: true,
+      backgroundColor: '#ffffff'
+    }).then(canvas => {
+      const fileName = `Fechado_Digital_${Date.now()}.png`;
+
+      // Estrategia de descarga
+      canvas.toBlob(blob => {
+        if (!blob) {
+          alert("Error al generar la imagen.");
+          downloadBtn.textContent = "📥 Descargar Comprobante (PNG)";
+          downloadBtn.disabled = false;
+          return;
+        }
+
+        // Descarga directa mediante elemento link
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+        downloadBtn.textContent = "📥 Descargar Comprobante (PNG)";
+        downloadBtn.disabled = false;
+      }, 'image/png');
+    }).catch(err => {
+      alert("Error al guardar: " + err.message);
+      downloadBtn.textContent = "📥 Descargar Comprobante (PNG)";
+      downloadBtn.disabled = false;
+    });
   }
 </script>
 
