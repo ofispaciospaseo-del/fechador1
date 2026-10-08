@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fechador Digital de Fe Cierta</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent-color: #0284c7;
+      --stamp-color: #dc2626;
+      --text-color: #f8fafc;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      color: #38bdf8;
+    }
+
+    /* Línea de tiempo en tiempo real */
+    .timeline-bar {
+      background: #090d16;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      font-family: monospace;
+      margin-bottom: 24px;
+    }
+
+    .clock-live {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #22c55e;
+      letter-spacing: 1px;
+    }
+
+    .upload-zone {
+      border: 2px dashed #475569;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      cursor: pointer;
+      background: #111827;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--accent-color);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    /* Área del documento/acta estampada */
+    .certificate-card {
+      position: relative;
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 8px;
+      padding: 24px;
+      margin-top: 20px;
+      display: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .preview-img {
+      max-width: 100%;
+      max-height: 400px;
+      display: block;
+      margin: 0 auto 20px auto;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .data-list {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      border-top: 2px solid #e2e8f0;
+      padding-top: 15px;
+    }
+
+    .data-list strong {
+      color: #0f172a;
+    }
+
+    /* Sello Cuadrado "Fechado Digital" */
+    .stamp-square {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 130px;
+      height: 130px;
+      border: 4px solid var(--stamp-color);
+      color: var(--stamp-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      transform: rotate(-12deg);
+      opacity: 0.85;
+      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+      user-select: none;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 6px;
+      box-sizing: border-box;
+    }
+
+    .stamp-title {
+      font-size: 0.8rem;
+      border-bottom: 2px solid var(--stamp-color);
+      padding-bottom: 2px;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    .stamp-status {
+      font-size: 0.65rem;
+      margin-top: 4px;
+    }
+
+    .stamp-time {
+      font-size: 0.6rem;
+      font-family: monospace;
+      word-break: break-all;
+    }
+
+    .btn {
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background: #0369a1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Fechador Digital de Fe Cierta</h1>
+
+  <!-- Línea de tiempo / Reloj continuo -->
+  <div class="timeline-bar">
+    <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px;">LÍNEA DE TIEMPO EN VIVO (UTC)</div>
+    <div class="clock-live" id="liveClock">0000-00-00 00:00:00.000</div>
+  </div>
+
+  <!-- Zona de carga -->
+  <div class="upload-zone" onclick="document.getElementById('imgInput').click()">
+    <p>📁 Haz clic o arrastra una imagen aquí para fechar</p>
+    <input type="file" id="imgInput" accept="image/*" onchange="processImage(this.files[0])">
+  </div>
+
+  <!-- Acta / Comprobante con el Sello -->
+  <div class="certificate-card" id="certificate">
+    <!-- Sello Cuadrado Fechado Digital -->
+    <div class="stamp-square">
+      <div class="stamp-title">FECHADO DIGITAL</div>
+      <div class="stamp-status">VERIFICADO</div>
+      <div class="stamp-time" id="stampTimeCode">00:00:00.000</div>
+    </div>
+
+    <h3>Acta de Estampa Temporal</h3>
+    <img id="imgPreview" class="preview-img" alt="Vista previa de imagen">
+
+    <div class="data-list">
+      <p><strong>Fecha y Hora de Registro (ms):</strong> <span id="recTime">--</span></p>
+      <p><strong>Peso / Tamaño:</strong> <span id="recSize">--</span></p>
+      <p><strong>Nombre del Archivo:</strong> <span id="recName">--</span></p>
+      <p><strong>Geolocalización:</strong> <span id="recGeo">Obteniendo coordenadas...</span></p>
+    </div>
+
+    <button class="btn" onclick="window.print()">Imprimir / Guardar PDF</button>
+  </div>
+</div>
+
+<script>
+  // Actualización continua de la línea de tiempo con milisegundos
+  function updateLiveClock() {
+    const now = new Date();
+    const isoString = now.toISOString().replace('T', ' ').replace('Z', '');
+    document.getElementById('liveClock').textContent = isoString;
+    requestAnimationFrame(updateLiveClock);
+  }
+  requestAnimationFrame(updateLiveClock);
+
+  // Procesamiento de la imagen cargada
+  function processImage(file) {
+    if (!file) return;
+
+    // 1. Estampa de tiempo exacta al seleccionar el archivo
+    const timestamp = new Date();
+    const formattedTime = timestamp.toISOString().replace('T', ' ').replace('Z', '');
+
+    // 2. Peso y datos del archivo
+    const sizeInKB = (file.size / 1024).toFixed(2);
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    const sizeStr = file.size > 1048576 ? `${sizeInMB} MB (${file.size} bytes)` : `${sizeInKB} KB (${file.size} bytes)`;
+
+    // Mostrar vista previa
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('imgPreview').src = e.target.result;
+      document.getElementById('recTime').textContent = formattedTime;
+      document.getElementById('recSize').textContent = sizeStr;
+      document.getElementById('recName').textContent = file.name;
+      
+      // Actualizar texto dentro del sello cuadrado
+      const timeOnly = formattedTime.split(' ')[1] || formattedTime;
+      document.getElementById('stampTimeCode').textContent = timeOnly;
+
+      document.getElementById('certificate').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+
+    // 3. Geolocalización
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude.toFixed(6);
+          const lon = position.coords.longitude.toFixed(6);
+          const acc = position.coords.accuracy.toFixed(1);
+          document.getElementById('recGeo').textContent = `Lat: ${lat}, Lon: ${lon} (Precisión: ±${acc}m)`;
+        },
+        (error) => {
+          document.getElementById('recGeo').textContent = `Permiso denegado o no disponible (${error.message})`;
+        },
+        { enableHighAccuracy: true }
+      );
+    } else {
+      document.getElementById('recGeo').textContent = "Geolocalización no soportada por el navegador.";
+    }
+  }
+</script>
+
+</body>
+</html>
